@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using PrsProofServer.Models;
 
 namespace PrsProofServer {
     public class Startup {
@@ -20,6 +22,9 @@ namespace PrsProofServer {
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
+            var connStr = @"server=localhost\sqlexpress;database=PrsProofDb;trusted_connection=true;";
+            services.AddDbContext<AppDbContext>(context => context.UseLazyLoadingProxies().UseSqlServer(connStr));
+            services.AddCors();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
@@ -28,7 +33,7 @@ namespace PrsProofServer {
             if(env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials());
             app.UseMvc();
         }
     }
